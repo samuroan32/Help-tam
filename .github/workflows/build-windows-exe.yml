@@ -1,0 +1,58 @@
+name: Build Windows EXE
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pyinstaller
+
+      - name: Build updater.exe
+        shell: pwsh
+        run: |
+          pyinstaller --noconfirm --clean --windowed --onefile --name updater updater.py
+
+      - name: Build game_launcher.exe
+        shell: pwsh
+        run: |
+          pyinstaller --noconfirm --clean --windowed --onefile --name game_launcher app.py
+
+      - name: Prepare package
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist/package | Out-Null
+          Copy-Item dist/updater.exe dist/package/updater.exe -Force
+          Copy-Item dist/game_launcher.exe dist/package/game_launcher.exe -Force
+          Copy-Item version.json dist/package/version.json -Force
+          Copy-Item config.py dist/package/config.py -Force
+          Compress-Archive -Path dist/package/* -DestinationPath dist/game-updater-windows.zip -Force
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: game-updater-windows
+          path: dist/game-updater-windows.zip
+
+      - name: Attach artifact to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/game-updater-windows.zip

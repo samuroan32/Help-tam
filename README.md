@@ -9,15 +9,19 @@
 - `version_checker.py` — логика сравнения версий и запросов к GitHub.
 - `config.py` — конфигурация репозитория, имён файлов и URL.
 - `version.json` — локальная версия игры.
+- `build_windows.bat` — локальная сборка `.exe` в 1 клик.
+- `.github/workflows/build-windows-exe.yml` — автосборка `.exe` на GitHub Actions.
 
 ## Установка зависимостей
 
 ```bash
+pip install -r requirements.txt
 pip install requests
 ```
 
 `tkinter` обычно уже входит в стандартный Python для Windows.
 
+## Быстрый запуск (из исходников)
 ## Быстрый запуск
 
 ```bash
@@ -29,6 +33,32 @@ python app.py
 ```bash
 python updater.py
 ```
+
+## Как получить `.exe`, чтобы не компилировать вручную
+
+### Вариант 1 (рекомендуется): GitHub Actions (без локальной компиляции)
+
+1. Запушьте проект в GitHub.
+2. Создайте тег версии, например `v1.0.0`, и push тега.
+3. Workflow `Build Windows EXE` автоматически соберёт:
+   - `game_launcher.exe`
+   - `updater.exe`
+   - архив `game-updater-windows.zip`
+4. Готовый zip появится:
+   - в **Actions artifacts**,
+   - и автоматически прикрепится к **GitHub Release** для тега.
+
+То есть вам не нужно компилировать на своём ПК — просто скачать готовый архив из релиза.
+
+### Вариант 2: локальная сборка в 1 клик
+
+На Windows просто запустите:
+
+```bat
+build_windows.bat
+```
+
+Готовые файлы будут в `dist\package\`.
 
 ## Что изменить под свой проект
 
@@ -109,9 +139,11 @@ URL настраивается в `RAW_VERSION_URL` в `config.py`.
 
 ## Примечание по упаковке в exe
 
+Для production на Windows используется 2 exe:
 Для production на Windows обычно собирают два exe:
 
 - `game_launcher.exe` (из `app.py`)
 - `updater.exe` (из `updater.py`)
 
+Такая схема безопасна и практична: updater работает отдельным процессом и может обновлять файлы, пока игра закрыта.
 Например через PyInstaller. Тогда updater сможет запускаться отдельно и обновлять файлы, пока основная игра закрыта.
