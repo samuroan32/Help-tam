@@ -16,11 +16,13 @@
 
 ```bash
 pip install -r requirements.txt
+pip install requests
 ```
 
 `tkinter` обычно уже входит в стандартный Python для Windows.
 
 ## Быстрый запуск (из исходников)
+## Быстрый запуск
 
 ```bash
 python app.py
@@ -138,8 +140,10 @@ URL настраивается в `RAW_VERSION_URL` в `config.py`.
 ## Примечание по упаковке в exe
 
 Для production на Windows используется 2 exe:
+Для production на Windows обычно собирают два exe:
 
 - `game_launcher.exe` (из `app.py`)
 - `updater.exe` (из `updater.py`)
 
 Такая схема безопасна и практична: updater работает отдельным процессом и может обновлять файлы, пока игра закрыта.
+Например через PyInstaller. Тогда updater сможет запускаться отдельно и обновлять файлы, пока основная игра закрыта.
